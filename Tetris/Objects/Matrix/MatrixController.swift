@@ -10,6 +10,7 @@ import Foundation
 
 protocol MatrixListener {
     func onFinish()
+    func updateCounter(result: Int)
     func figureMoved(figure: Figure)
     func updateGrid(array: Array2D<Element>)
 }
@@ -25,7 +26,7 @@ final class MatrixController {
     private let grid: GameGridInput
     private let control: FigureHelperInput
     
-    private var elements: Array2D<Element>!
+    private var matrix: Array2D<Element>!
     private var currentFigure: Figure!
     private var delegate: MatrixListener?
     
@@ -34,7 +35,7 @@ final class MatrixController {
         self.grid = grid
         self.delegate = delegate
         self.control = control
-        self.elements = getDefaultElementsArray()
+        self.matrix = getEmptyFieldMatrix()
     }
 
     // MARK: - Private
@@ -50,31 +51,35 @@ final class MatrixController {
     }
     
     private func translateFigureIntoGrid(figure: Figure) {
-        figure.positions.forEach { elements[$0.row, $0.column] = Element(color: figure.color, type: .figure) }
-        delegate?.updateGrid(array: elements)
+        figure.positions.forEach { matrix[$0.row, $0.column] = Element(color: figure.color, type: .figure) }
+        delegate?.updateGrid(array: matrix)
     }
     
-    private func removeFilledRowsIfExists(elements: Array2D<Element>) -> Array2D<Element> {
-        var updatedGrid = getDefaultElementsArray()
-        
+    private func removeFilledRowsIfExists(matrix: Array2D<Element>) -> Array2D<Element> {
+        let filledRowMatrixIndexes = matrix.elements.enumerated()
+            .map { $0.element.contains(where: { $0?.type == ElementType.emptyField }) ? nil : $0.offset }
+            .compactMap { $0 }
+
+        guard !filledRowMatrixIndexes.isEmpty else { return matrix }
+
+        var updatedGrid = getEmptyFieldMatrix()
         var row = grid.rows - 1
-        var moveNextRowDown: Int = 0
+        var currentRow = grid.rows - 1
         while row >= 0 {
-            if elements[row]?.first(where: { $0?.type == ElementType.emptyField }) != nil {
-                updatedGrid[row + moveNextRowDown] = elements[row]
-                row -= 1
-                continue
+            if !filledRowMatrixIndexes.contains(row) {
+                updatedGrid[currentRow] = matrix.elements[row]
+                currentRow -= 1
             }
             row -= 1
-            moveNextRowDown += 1
         }
+        delegate?.updateCounter(result: filledRowMatrixIndexes.count)
         return updatedGrid
     }
     
     // MARK: - Move
     private func possibleMoveFor(_ positions: [Position]) -> Bool {
         let intersectElement = positions.first(where: { element in
-            let checkIntersections = elements[element.row, element.column]?.type == .figure
+            let checkIntersections = matrix[element.row, element.column]?.type == .figure
             let checkBounds = element.row >= grid.rows || element.column < 0 || element.column >= grid.columns
             return checkIntersections || checkBounds
         })
@@ -111,7 +116,7 @@ final class MatrixController {
         return updatedPositions
     }
 
-    private func getDefaultElementsArray() -> Array2D<Element> {
+    private func getEmptyFieldMatrix() -> Array2D<Element> {
         var array = Array2D<Element>(columns: grid.columns, rows: grid.rows)
         array.fillWith(value: Element(type: .emptyField))
         return array
@@ -121,8 +126,8 @@ final class MatrixController {
 extension MatrixController: MatrixInput {
     func startNewGame() {
         currentFigure = nil
-        elements = getDefaultElementsArray()
-        delegate?.updateGrid(array: elements)
+        matrix = getEmptyFieldMatrix()
+        delegate?.updateGrid(array: matrix)
         addNewFigure()
     }
 
@@ -142,8 +147,8 @@ extension MatrixController: MatrixInput {
         if moveType == .down {
             translateFigureIntoGrid(figure: currentFigure)
             currentFigure = nil
-            elements = removeFilledRowsIfExists(elements: elements)
-            delegate?.updateGrid(array: elements)
+            matrix = removeFilledRowsIfExists(matrix: matrix)
+            delegate?.updateGrid(array: matrix)
             addNewFigure()
         }
     }

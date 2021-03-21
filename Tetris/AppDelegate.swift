@@ -14,12 +14,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let gameController = GameController(grid: GameGrid())
-        let vc = GameViewController(gameController: gameController, elementSize: CGSize(width: 30, height: 30))
-        gameController.delegate = vc
-
-        let navVC = UINavigationController(rootViewController: vc)
-        window?.rootViewController = navVC
+        window = UIWindow()
+        window?.rootViewController = BaseRouter().getRootViewController()
         window?.makeKeyAndVisible()
         return true
     }

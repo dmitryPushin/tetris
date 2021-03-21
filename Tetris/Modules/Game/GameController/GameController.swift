@@ -14,9 +14,11 @@ protocol GameControllerInput {
     var grid: GameGridInput { get }
     var delegate: GameControllerOutput? { get set }
 
+    func startGame()
+    func pauseGame()
     func prepareMatrix()
-    func start()
     func handleMove(type: MoveTypes)
+    func forceTimer(needForce: Bool)
 }
 
 enum GameLayer {
@@ -24,17 +26,13 @@ enum GameLayer {
     case figure
 }
 
-struct IntermediateFigure {
-    let color: FigureColors?
-    let position: Position
-}
-
 protocol GameControllerOutput: class {
+    func update(counter: Int)
     func update(layer: GameLayer, objects: [IntermediateFigure])
     func showAlert(title: String, message: String, action: @escaping () -> Void)
 }
 
-class GameController: GameControllerInput {
+class GameController {
     var delegate: GameControllerOutput?
 
     private var matrix: MatrixController!
@@ -42,44 +40,72 @@ class GameController: GameControllerInput {
     private(set) var grid: GameGridInput
     private var repeatingTimer: RepeatingTimer?
 
+    // TODO: Move to separate structure or game info class
+    private var counter: Int = 0
+    private var defaultTimerSpeed = 0.5
+    private var forceTimerSpeed = 0.05
+
     required init(grid: GameGridInput) {
         self.grid = grid
     }
 
-    func prepareMatrix() {
-        var figures = try? FigureFetcher.prepareFigures()
-        figures = figures?.filter({ $0.type == .standard })
-        
-        let control = FigureHelper(figures: figures ?? [])
-        matrix = MatrixController(grid: grid, control: control, delegate: self)
-    }
-
-    func start() {
-        matrix.startNewGame()
-        startTimer()
-    }
-
-    private func startTimer() {
-        repeatingTimer = RepeatingTimer(interval: 0.5, handler: {
+    private func startTimer(interval: Double) {
+        repeatingTimer = RepeatingTimer(interval: interval, handler: {
             DispatchQueue.main.async { [weak self] in
                 self?.handleMove(type: .down)
             }
         })
         repeatingTimer?.resume()
     }
+}
+
+extension GameController: GameControllerInput {
+    func forceTimer(needForce: Bool) {
+        if needForce {
+            pauseGame()
+            startTimer(interval: forceTimerSpeed)
+        } else {
+            pauseGame()
+            startTimer(interval: defaultTimerSpeed)
+        }
+    }
 
     func handleMove(type: MoveTypes) {
         matrix.moveFigure(moveType: type)
     }
+
+    func prepareMatrix() {
+        var figures = try? FigureFetcher.prepareFigures()
+        figures = figures?.filter({ $0.type == .standard })
+
+        let control = FigureHelper(figures: figures ?? [])
+        matrix = MatrixController(grid: grid, control: control, delegate: self)
+    }
+
+    func startGame() {
+        matrix.startNewGame()
+        startTimer(interval: defaultTimerSpeed)
+        delegate?.update(counter: counter)
+    }
+
+    func pauseGame() {
+        repeatingTimer = nil
+        // TODO: Save state
+    }
 }
 
 extension GameController: MatrixListener {
+    func updateCounter(result: Int) {
+        counter += result
+        delegate?.update(counter: counter)
+    }
+
     func onFinish() {
         repeatingTimer = nil
         delegate?.showAlert(title: "Игра завершена",
                             message: "Попробовать снова?",
                             action: { [unowned self] in
-                                self.start()
+                                self.startGame()
                             })
     }
 
@@ -89,21 +115,20 @@ extension GameController: MatrixListener {
     }
 
     func updateGrid(array: Array2D<Element>) {
-        // TODO: ??
-        var test = [IntermediateFigure]()
+        var viewModels = [IntermediateFigure]()
 
         for row in 0..<grid.rows {
             for column in 0..<grid.columns {
                 guard let element = array[row, column] else { continue }
-                switch element.type {
-                case .figure:
-                    test.append(IntermediateFigure(color: element.color, position: Position(row, column)))
-                default:
-                    test.append(IntermediateFigure(color: nil, position: Position(row, column)))
-                }
+                let figure = IntermediateFigure(color: element.type! == .figure ? element.color : nil,
+                                                position: Position(row, column))
+                viewModels.append(figure)
             }
         }
 
-        delegate?.update(layer: .grid, objects: test)
+        delegate?.update(layer: .grid, objects: viewModels)
+
+        pauseGame()
+        startTimer(interval: defaultTimerSpeed)
     }
 }

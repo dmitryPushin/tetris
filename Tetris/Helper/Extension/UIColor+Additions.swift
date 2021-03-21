@@ -36,7 +36,7 @@ extension UIColor {
         
         var rgbValue: UInt32 = 0
         Scanner(string: colorString).scanHexInt32(&rgbValue)
-        
+
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
@@ -44,4 +44,11 @@ extension UIColor {
             alpha: CGFloat(1.0)
         )
     }
+}
+
+extension UIColor {
+    class var backgroundColor: UIColor { UIColor.hexStringToUIColor(hex: "f6f5f5") }
+    class var containerColor: UIColor { UIColor.hexStringToUIColor(hex: "d3e0ea") }
+    class var buttonBGColor: UIColor { UIColor.hexStringToUIColor(hex: "d3e0ea") }
+    class var btnTintColor: UIColor { UIColor.hexStringToUIColor(hex: "276678") }
 }

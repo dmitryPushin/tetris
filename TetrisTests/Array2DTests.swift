@@ -84,10 +84,12 @@ class Array2DTests: XCTestCase {
 
     func testInvalidSubscription() {
         // Given
-
+        var grid = Array2D<Int>(columns: 3, rows: 3)
         // When
+        grid[4] = [Int]()
 
         // THen
+        XCTAssertNil(grid[4])
     }
 
     override func setUp() {}
