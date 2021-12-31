@@ -26,7 +26,7 @@ enum GameLayer {
     case figure
 }
 
-protocol GameControllerOutput: class {
+protocol GameControllerOutput: AnyObject {
     func update(counter: Int)
     func update(layer: GameLayer, objects: [IntermediateFigure])
     func showAlert(title: String, message: String, action: @escaping () -> Void)

@@ -9,7 +9,7 @@
 import UIKit
 import SpriteKit
 
-protocol GameViewInput: class {
+protocol GameViewInput: AnyObject {
     var delegate: GameViewOutput? { get set }
 
     // TODO: Think about it
@@ -20,7 +20,7 @@ protocol GameViewInput: class {
     func drawLayer(layer: GameLayer, objects: [IntermediateFigure])
 }
 
-protocol GameViewOutput: class {
+protocol GameViewOutput: AnyObject {
     func back()
     func handleLongTap(isInProgress: Bool)
     func tapOnBtn(moveType: MoveTypes)
@@ -61,7 +61,6 @@ class GameView: UIView {
         backgroundColor = .backgroundColor
         containerView.backgroundColor = .containerColor
         containerView.layer.cornerRadius = 6
-        addDefaultShadow(views: [containerView])
         configureButtons()
         configureTitles()
     }
@@ -79,12 +78,17 @@ class GameView: UIView {
             btn.backgroundColor = .containerColor
             btn.layer.cornerRadius = 6
             btn.tintColor = .btnTintColor
+
+            btn.layer.shadowColor = UIColor.btnTintColor.withAlphaComponent(0.3).cgColor
+            btn.layer.shadowOpacity = 5
+            btn.layer.shadowOffset = .zero
+            btn.layer.shadowRadius = 3
         }
+
         leftBtn.setImage(#imageLiteral(resourceName: "left_icon"), for: .normal)
         rightBtn.setImage(#imageLiteral(resourceName: "right_icon"), for: .normal)
         downBtn.setImage(#imageLiteral(resourceName: "back_icon"), for: .normal)
         rotateBtn.setImage(#imageLiteral(resourceName: "baseline_rotate_right_black_18dp").withRenderingMode(.alwaysTemplate), for: .normal)
-        addDefaultShadow(views: views)
 
         backBtn.backgroundColor = .containerColor
         backBtn.layer.cornerRadius = backBtn.frame.width * 0.5
@@ -102,15 +106,6 @@ class GameView: UIView {
             delegate?.handleLongTap(isInProgress: false)
         default:
             break
-        }
-    }
-
-    private func addDefaultShadow(views: [UIView]) {
-        views.forEach { (view) in
-            view.layer.shadowColor = UIColor.btnTintColor.withAlphaComponent(0.3).cgColor
-            view.layer.shadowOpacity = 5
-            view.layer.shadowOffset = .zero
-            view.layer.shadowRadius = 3
         }
     }
 
@@ -158,6 +153,7 @@ extension GameView: GameViewInput {
     func drawLayer(layer: GameLayer, objects: [IntermediateFigure]) {
         switch layer {
         case .figure:
+
             figureScene.removeAllChildren()
             objects.forEach { (obj) in
                 let node = SKSpriteNode(color: obj.color?.getUIColor() ?? .white, size: layout.elementSize)
@@ -201,4 +197,3 @@ extension GameView {
         delegate?.back()
     }
 }
-
