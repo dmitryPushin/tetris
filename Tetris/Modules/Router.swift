@@ -12,6 +12,7 @@ protocol BaseRouterInput {
     func getRootViewController() -> UINavigationController
     func getGameViewController() -> UIViewController
     func getFigureViewController() -> UIViewController
+    func getSettingsViewController() -> UIViewController
 }
 
 struct BaseRouter: BaseRouterInput {
@@ -28,6 +29,10 @@ struct BaseRouter: BaseRouterInput {
         let vc = GameViewController(gameController: gameController)
         gameController.delegate = vc
         return vc
+    }
+
+    func getSettingsViewController() -> UIViewController {
+        SettingsViewController()
     }
 
     func getFigureViewController() -> UIViewController {

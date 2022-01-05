@@ -37,7 +37,7 @@ class StartView: UIView {
     private lazy var settingsBtn: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Figures", for: .normal)
+        btn.setTitle("Settings", for: .normal)
         btn.setTitleColor(.btnTintColor, for: .normal)
         btn.titleLabel?.font = UIFont.appFont(size: Const.fontSize, type: .medium)
         btn.backgroundColor = .clear

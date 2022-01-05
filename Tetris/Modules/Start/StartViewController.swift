@@ -32,7 +32,7 @@ extension StartViewController: StartViewOutput {
     }
 
     func openSettings() {
-        let vc = router.getFigureViewController()
+        let vc = router.getSettingsViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
 }

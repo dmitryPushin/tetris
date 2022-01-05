@@ -112,8 +112,8 @@ extension GameController: MatrixListener {
 
     func onFinish() {
         pauseGame()
-        delegate?.showAlert(title: "Игра завершена",
-                            message: "Ваш счет - \(counter). Попробуем снова?",
+        delegate?.showAlert(title: "The game is over",
+                            message: "You scored - \(counter). Once again?",
                             action: { [unowned self] in
             self.counter = 0
             self.startGame()

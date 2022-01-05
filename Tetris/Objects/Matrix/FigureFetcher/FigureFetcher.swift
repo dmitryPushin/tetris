@@ -14,16 +14,19 @@ protocol FigureFetcherInput {
 
 class FigureFetcher {
     static func prepareFigures() throws -> [DBFigureModel] {
-        if let elementURLs = Bundle.main.urls(forResourcesWithExtension: "json", subdirectory: nil) {
-            return elementURLs.compactMap({ obtainModelFrom(url: $0) })
+        if let figuresURL = Bundle.main.urls(forResourcesWithExtension: "json", subdirectory: nil) {
+            let result = figuresURL
+                .compactMap({ obtainModelFrom(url: $0) })
+                .reduce([], +)
+            return result
         }
         throw ErrorObject.noFigures
     }
 
-    private static func obtainModelFrom(url: URL) -> DBFigureModel? {
+    private static func obtainModelFrom(url: URL) -> [DBFigureModel]? {
         do {
             let data = try Data(contentsOf: url)
-            let decoded = try JSONDecoder().decode(DBFigureModel.self, from: data)
+            let decoded = try JSONDecoder().decode([DBFigureModel].self, from: data)
             return decoded
         } catch let error {
             print(error)
