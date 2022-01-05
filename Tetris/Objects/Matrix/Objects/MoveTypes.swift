@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum MoveTypes: UInt {
+enum MoveTypes: Int, CaseIterable {
     case down = 0
     case left
     case right

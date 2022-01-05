@@ -21,10 +21,13 @@ class FigureFetcher {
     }
 
     private static func obtainModelFrom(url: URL) -> DBFigureModel? {
-        if let data = try? Data(contentsOf: url) ,
-           let decoded = try? JSONDecoder().decode(DBFigureModel.self, from: data) {
+        do {
+            let data = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode(DBFigureModel.self, from: data)
             return decoded
+        } catch let error {
+            print(error)
+            return nil
         }
-        return nil
     }
 }

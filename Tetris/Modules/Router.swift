@@ -20,7 +20,10 @@ struct BaseRouter: BaseRouterInput {
     }
 
     func getGameViewController() -> UIViewController {
-        let gameController = GameController(grid: GameGrid())
+        let gameController = GameController(
+            grid: GameGrid(),
+            configuration: GameConfiguration(useDefaultFigures: true)
+        )
 
         let vc = GameViewController(gameController: gameController)
         gameController.delegate = vc

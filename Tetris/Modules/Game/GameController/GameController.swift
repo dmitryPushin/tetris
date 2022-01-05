@@ -9,7 +9,7 @@
 import Foundation
 
 protocol GameControllerInput {
-    init(grid: GameGridInput)
+    init(grid: GameGridInput, configuration: GameConfiguration)
     
     var grid: GameGridInput { get }
     var delegate: GameControllerOutput? { get set }
@@ -18,7 +18,7 @@ protocol GameControllerInput {
     func pauseGame()
     func prepareMatrix()
     func handleMove(type: MoveTypes)
-    func forceTimer(needForce: Bool)
+    func forceSpeedForMove(type: MoveTypes, needForce: Bool)
 }
 
 enum GameLayer {
@@ -36,38 +36,45 @@ class GameController {
     var delegate: GameControllerOutput?
 
     private var matrix: MatrixController!
-
     private(set) var grid: GameGridInput
+    private(set) var configuration: GameConfiguration
+
     private var repeatingTimer: RepeatingTimer?
-
-    // TODO: Move to separate structure or game info class
+    private var forcedMoveRepeatingTimer: RepeatingTimer?
     private var counter: Int = 0
-    private var defaultTimerSpeed = 0.5
-    private var forceTimerSpeed = 0.05
 
-    required init(grid: GameGridInput) {
+    required init(grid: GameGridInput, configuration: GameConfiguration) {
         self.grid = grid
+        self.configuration = configuration
     }
 
-    private func startTimer(interval: Double) {
-        repeatingTimer = RepeatingTimer(interval: interval, handler: {
+    private func startTimer(interval: Double, forcedMoveType: MoveTypes?) {
+        let timer = RepeatingTimer(interval: interval, handler: {
             DispatchQueue.main.async { [weak self] in
-                self?.handleMove(type: .down)
+                self?.handleMove(type: forcedMoveType ?? .down)
             }
         })
-        repeatingTimer?.resume()
+        timer.resume()
+        if forcedMoveType != nil {
+            forcedMoveRepeatingTimer = timer
+        } else {
+            repeatingTimer = timer
+        }
     }
 }
 
 extension GameController: GameControllerInput {
-    func forceTimer(needForce: Bool) {
+    func forceSpeedForMove(type: MoveTypes, needForce: Bool) {
+        pauseGame()
         if needForce {
-            pauseGame()
-            startTimer(interval: forceTimerSpeed)
-        } else {
-            pauseGame()
-            startTimer(interval: defaultTimerSpeed)
+            switch type {
+            case .rotate:
+                startTimer(interval: configuration.rotateForceTimerSpeed, forcedMoveType: type)
+            default:
+                startTimer(interval: configuration.forceTimerSpeed, forcedMoveType: type)
+            }
         }
+        startTimer(interval: configuration.defaultTimerSpeed, forcedMoveType: nil)
     }
 
     func handleMove(type: MoveTypes) {
@@ -75,21 +82,24 @@ extension GameController: GameControllerInput {
     }
 
     func prepareMatrix() {
-        var figures = try? FigureFetcher.prepareFigures()
-        figures = figures?.filter({ $0.type == .standard })
-
-        let control = FigureHelper(figures: figures ?? [])
-        matrix = MatrixController(grid: grid, control: control, delegate: self)
+        do {
+            let figures = try FigureFetcher.prepareFigures()
+            let control = FigureHelper(figures: figures, configuration: configuration)
+            matrix = MatrixController(grid: grid, control: control, delegate: self)
+        } catch {
+            fatalError("There are no available figures")
+        }
     }
 
     func startGame() {
         matrix.startNewGame()
-        startTimer(interval: defaultTimerSpeed)
+        startTimer(interval: configuration.defaultTimerSpeed, forcedMoveType: nil)
         delegate?.update(counter: counter)
     }
 
     func pauseGame() {
         repeatingTimer = nil
+        forcedMoveRepeatingTimer = nil
         // TODO: Save state
     }
 }
@@ -101,12 +111,13 @@ extension GameController: MatrixListener {
     }
 
     func onFinish() {
-        repeatingTimer = nil
+        pauseGame()
         delegate?.showAlert(title: "Игра завершена",
-                            message: "Попробовать снова?",
+                            message: "Ваш счет - \(counter). Попробуем снова?",
                             action: { [unowned self] in
-                                self.startGame()
-                            })
+            self.counter = 0
+            self.startGame()
+        })
     }
 
     func figureMoved(figure: Figure) {
@@ -120,8 +131,10 @@ extension GameController: MatrixListener {
         for row in 0..<grid.rows {
             for column in 0..<grid.columns {
                 guard let element = array[row, column] else { continue }
-                let figure = IntermediateFigure(color: element.type! == .figure ? element.color : nil,
-                                                position: Position(row, column))
+                let figure = IntermediateFigure(
+                    color: element.type! == .figure ? element.color : nil,
+                    position: Position(row, column)
+                )
                 viewModels.append(figure)
             }
         }
@@ -129,6 +142,6 @@ extension GameController: MatrixListener {
         delegate?.update(layer: .grid, objects: viewModels)
 
         pauseGame()
-        startTimer(interval: defaultTimerSpeed)
+        startTimer(interval: configuration.defaultTimerSpeed, forcedMoveType: nil)
     }
 }

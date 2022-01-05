@@ -35,7 +35,7 @@ struct DBFigureModel: Codable {
         type = try container.decode(DBFigureType.self, forKey: .type)
         let elements = try container.decode([[Int]].self, forKey: .structure)
 
-        guard try DBFigureModel.isAvailable(structure: elements),
+        guard DBFigureModel.isSquareMatrix(array: elements),
               let array2d = Array2D(elements: elements) else {
             throw ErrorObject.codableError
         }
@@ -43,14 +43,8 @@ struct DBFigureModel: Codable {
         structure = array2d
     }
 
-    // TODO: CHeck row and columns count
-    private static func isAvailable(structure: [[Int]]) throws -> Bool {
-        let availableValues = Set(DBFigureModelField.allCases.map { $0.rawValue })
-        let structureValues = Set(structure.reduce([], +))
-        guard structureValues.symmetricDifference(availableValues).isEmpty else {
-            throw ErrorObject.codableError
-        }
-        return true
+    private static func isSquareMatrix(array: [[Int]]) -> Bool {
+        return Set([array.count]) == Set(array.map { $0.count })
     }
 
     func encode(to encoder: Encoder) throws {

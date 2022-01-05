@@ -8,9 +8,16 @@
 
 import UIKit
 
-protocol StartViewOutput: class {
+protocol StartViewOutput: AnyObject {
     func startGame()
     func openSettings()
+}
+
+private struct Const {
+    static let fontSize: CGFloat = 24
+    static let btnWidth: CGFloat = 120
+    static let startGameBtnMargin: CGFloat = 40
+    static let settingsBtnMargin: CGFloat = 100
 }
 
 class StartView: UIView {
@@ -21,7 +28,7 @@ class StartView: UIView {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Start game", for: .normal)
         btn.setTitleColor(.btnTintColor, for: .normal)
-        btn.titleLabel?.font = UIFont.appFont(size: 24, type: .medium)
+        btn.titleLabel?.font = UIFont.appFont(size: Const.fontSize, type: .medium)
         btn.backgroundColor = .clear
         btn.addTarget(self, action: #selector(handleStartGameBtnTap), for: .touchUpInside)
         return btn
@@ -32,7 +39,7 @@ class StartView: UIView {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Figures", for: .normal)
         btn.setTitleColor(.btnTintColor, for: .normal)
-        btn.titleLabel?.font = UIFont.appFont(size: 24, type: .medium)
+        btn.titleLabel?.font = UIFont.appFont(size: Const.fontSize, type: .medium)
         btn.backgroundColor = .clear
         btn.addTarget(self, action: #selector(handleSettingsBtnTap), for: .touchUpInside)
         return btn
@@ -59,12 +66,12 @@ class StartView: UIView {
 
         NSLayoutConstraint.activate([
             startGameBtn.centerXAnchor.constraint(equalTo: centerXAnchor),
-            startGameBtn.widthAnchor.constraint(equalToConstant: 120),
-            startGameBtn.bottomAnchor.constraint(equalTo: settingsBtn.topAnchor, constant: -40),
+            startGameBtn.widthAnchor.constraint(equalToConstant: Const.btnWidth),
+            startGameBtn.bottomAnchor.constraint(equalTo: settingsBtn.topAnchor, constant: -Const.startGameBtnMargin),
 
             settingsBtn.centerXAnchor.constraint(equalTo: centerXAnchor),
-            settingsBtn.widthAnchor.constraint(equalToConstant: 120),
-            settingsBtn.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -100),
+            settingsBtn.widthAnchor.constraint(equalToConstant: Const.btnWidth),
+            settingsBtn.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Const.settingsBtnMargin),
         ])
     }
 

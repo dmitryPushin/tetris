@@ -9,12 +9,14 @@
 import UIKit
 
 class GameViewController: UIViewController {
-    private var gameView: GameView?
+    private var gameView: GameView? {
+        view as? GameView
+    }
 
-    private let controller: GameControllerInput
+    private let gameController: GameControllerInput
 
     init(gameController: GameControllerInput) {
-        self.controller = gameController
+        self.gameController = gameController
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -23,10 +25,10 @@ class GameViewController: UIViewController {
     }
 
     override func loadView() {
-        let mainView = GameView.loadFromNib() as? GameView
-        mainView?.delegate = self
-        self.gameView = mainView
-        self.view = mainView ?? UIView()
+        let mainView = GameView(frame: .zero)
+        mainView.delegate = self
+        view = mainView
+        gameView?.setup(grid: gameController.grid)
     }
     
     override func viewDidLoad() {
@@ -34,30 +36,28 @@ class GameViewController: UIViewController {
 
         navigationController?.setNavigationBarHidden(true, animated: false)
         
-        controller.prepareMatrix()
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        gameView?.setup(grid: controller.grid)
+        gameController.prepareMatrix()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        controller.startGame()
+        gameController.startGame()
     }
 }
 
 extension GameViewController: GameViewOutput {
-    func tapOnBtn(moveType: MoveTypes) {
-        controller.handleMove(type: moveType)
+    func tapOnBackBtn() {
+        gameController.pauseGame()
+        navigationController?.popViewController(animated: true)
     }
 
-    func back() {
-        controller.pauseGame()
-        navigationController?.popViewController(animated: true)
+    func longTapOnBtn(moveType: MoveTypes, isInProgress: Bool) {
+        gameController.forceSpeedForMove(type: moveType, needForce: isInProgress)
+    }
+
+    func tapOnBtn(moveType: MoveTypes) {
+        gameController.handleMove(type: moveType)
     }
 }
 
@@ -82,7 +82,7 @@ extension GameViewController: GameControllerOutput {
         // Workaround for cancel long tap pressure
         switch layer {
         case .grid:
-            gameView?.cancelGestureHandling()
+            gameView?.cancelLongTapGesture()
         default:
             break
         }
@@ -90,13 +90,5 @@ extension GameViewController: GameControllerOutput {
 
     func update(counter: Int) {
         gameView?.updateScore(count: counter)
-    }
-
-    func handleLongTap(isInProgress: Bool) {
-        if isInProgress {
-            controller.forceTimer(needForce: true)
-        } else {
-            controller.forceTimer(needForce: false)
-        }
     }
 }

@@ -13,7 +13,6 @@
 		2B0F212B26069C870037CA25 /* FigureHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0F212A26069C870037CA25 /* FigureHelper.swift */; };
 		2B14B12C25FFEBC800B52928 /* Array2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B14B12B25FFEBC800B52928 /* Array2D.swift */; };
 		2B238996241D6DE500FCA685 /* X.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B238995241D6DE500FCA685 /* X.json */; };
-		2B5C49FC25E12EFC007C7A38 /* GameView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2B5C49FB25E12EFC007C7A38 /* GameView.xib */; };
 		2B68EB0A25ED95AD00ABE6E2 /* MoveTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B68EB0925ED95AD00ABE6E2 /* MoveTypes.swift */; };
 		2B68EB1225ED970600ABE6E2 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B68EB1125ED970600ABE6E2 /* Position.swift */; };
 		2B71DFED26A6128A00B84ECD /* FigureColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B71DFEC26A6128A00B84ECD /* FigureColors.swift */; };
@@ -28,6 +27,7 @@
 		2BBE78892607C8B900BE738B /* UIFont+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBE78882607C8B900BE738B /* UIFont+Extensions.swift */; };
 		2BBE788D2607CA9300BE738B /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBE788C2607CA9300BE738B /* Router.swift */; };
 		2BBE78912607CBC400BE738B /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBE78902607CBC400BE738B /* StartView.swift */; };
+		2BC70691277F6BF4003AF177 /* GameConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC70690277F6BF4003AF177 /* GameConfiguration.swift */; };
 		2BD3051A25E0FFDB0012B267 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD3051925E0FFDB0012B267 /* GameView.swift */; };
 		2BD3052125E11BBD0012B267 /* N.json in Resources */ = {isa = PBXBuildFile; fileRef = 2BD3052025E11BBD0012B267 /* N.json */; };
 		2BD3052525E11C4F0012B267 /* FigureFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD3052425E11C4F0012B267 /* FigureFetcher.swift */; };
@@ -73,7 +73,6 @@
 		2B0F212A26069C870037CA25 /* FigureHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigureHelper.swift; sourceTree = "<group>"; };
 		2B14B12B25FFEBC800B52928 /* Array2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array2D.swift; sourceTree = "<group>"; };
 		2B238995241D6DE500FCA685 /* X.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = X.json; sourceTree = "<group>"; };
-		2B5C49FB25E12EFC007C7A38 /* GameView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GameView.xib; sourceTree = "<group>"; };
 		2B68EB0925ED95AD00ABE6E2 /* MoveTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveTypes.swift; sourceTree = "<group>"; };
 		2B68EB1125ED970600ABE6E2 /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 		2B71DFEC26A6128A00B84ECD /* FigureColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigureColors.swift; sourceTree = "<group>"; };
@@ -88,6 +87,7 @@
 		2BBE78882607C8B900BE738B /* UIFont+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIFont+Extensions.swift"; sourceTree = "<group>"; };
 		2BBE788C2607CA9300BE738B /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		2BBE78902607CBC400BE738B /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
+		2BC70690277F6BF4003AF177 /* GameConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfiguration.swift; sourceTree = "<group>"; };
 		2BD3051925E0FFDB0012B267 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		2BD3052025E11BBD0012B267 /* N.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = N.json; sourceTree = "<group>"; };
 		2BD3052425E11C4F0012B267 /* FigureFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigureFetcher.swift; sourceTree = "<group>"; };
@@ -183,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				2B984D2725ED7A24002DD657 /* GameGrid.swift */,
+				2BC70690277F6BF4003AF177 /* GameConfiguration.swift */,
 				2BF490E725E1277C00B7EF9A /* GameController.swift */,
 				2B71DFF026A615FD00B84ECD /* IntermediateFigure.swift */,
 			);
@@ -214,7 +215,6 @@
 				8AE541B3218368CE007A19E4 /* GameViewController.swift */,
 				2B71DFEC26A6128A00B84ECD /* FigureColors.swift */,
 				2BD3051925E0FFDB0012B267 /* GameView.swift */,
-				2B5C49FB25E12EFC007C7A38 /* GameView.xib */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -392,7 +392,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1020;
-				LastUpgradeCheck = 1000;
+				LastUpgradeCheck = 1310;
 				ORGANIZATIONNAME = "Dmitry Pushin";
 				TargetAttributes = {
 					8A6FAE3422B96F0B00B4A135 = {
@@ -440,7 +440,6 @@
 				8A0077202221888A00D6B7B7 /* Z.json in Resources */,
 				2BBE78852607C83400BE738B /* TTNorms-Medium.ttf in Resources */,
 				2BBE78832607C83400BE738B /* TTNorms-Bold.ttf in Resources */,
-				2B5C49FC25E12EFC007C7A38 /* GameView.xib in Resources */,
 				8A00771E2221888A00D6B7B7 /* T.json in Resources */,
 				8A00771D2221888A00D6B7B7 /* O.json in Resources */,
 				8A0077162221884800D6B7B7 /* I.json in Resources */,
@@ -481,6 +480,7 @@
 				8A7F08E2220F4B2900273BDD /* UIViewContoller+Extension.swift in Sources */,
 				2B0F2127260694F90037CA25 /* RotationAngle.swift in Sources */,
 				2B71DFF626A6216D00B84ECD /* PanelControlView.swift in Sources */,
+				2BC70691277F6BF4003AF177 /* GameConfiguration.swift in Sources */,
 				2BBE78892607C8B900BE738B /* UIFont+Extensions.swift in Sources */,
 				2B71DFF126A615FD00B84ECD /* IntermediateFigure.swift in Sources */,
 				8A1ECBA42184908900072318 /* UIColor+Additions.swift in Sources */,
@@ -530,7 +530,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = TetrisTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -550,7 +550,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = TetrisTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -590,6 +590,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -615,7 +616,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -651,6 +652,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -670,7 +672,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -687,7 +689,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Tetris/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -706,7 +708,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Tetris/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

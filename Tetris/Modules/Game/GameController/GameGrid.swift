@@ -20,10 +20,10 @@ struct GameGrid: GameGridInput {
     let columns: Int
 
     var middleColumn: Int {
-        return columns / 2
+        return max(0, (columns / 2) - 1)
     }
 
-    init(rows: Int = 14, columns: Int = 9) {
+    init(rows: Int = 20, columns: Int = 10) {
         self.rows = rows
         self.columns = columns
     }

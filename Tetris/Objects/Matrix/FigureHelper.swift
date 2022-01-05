@@ -9,7 +9,7 @@
 import Foundation
 
 protocol FigureHelperInput {
-    init(figures: [DBFigureModel])
+    init(figures: [DBFigureModel], configuration: GameConfiguration)
 
     func generateFigure(startColumn: Int) -> Figure
     func getRotatedPositionsFor(figure: Figure) -> [Position]
@@ -23,14 +23,19 @@ private struct PositionBounds {
 final class FigureHelper {
     private let figureModels: [DBFigureModel]
 
-    required init(figures: [DBFigureModel]) {
-        self.figureModels = figures
+    required init(figures: [DBFigureModel], configuration: GameConfiguration) {
+        if configuration.useDefaultFigures {
+            self.figureModels = figures.filter { $0.type == .standard }
+        } else {
+            self.figureModels = figures
+        }
     }
 }
 
 extension FigureHelper: FigureHelperInput {
     func generateFigure(startColumn: Int) -> Figure {
-        return Figure(figureModel: figureModels.randomElement()!, startColumn: startColumn)
+        let model = figureModels.randomElement()!
+        return Figure(figureModel: model, startColumn: startColumn)
     }
 
     func getRotatedPositionsFor(figure: Figure) -> [Position] {
@@ -39,7 +44,8 @@ extension FigureHelper: FigureHelperInput {
 
         let coord = getMinimalBoundsFor(positions: mappedPositions)
 
-        let elements = rotatedPositions.elements.enumerated()
+        let elements = rotatedPositions.elements
+            .enumerated()
             .map { (value) in
                 value.element.enumerated().map {
                     $0.element != nil ? Position(coord.minRowIndex! + value.offset, coord.minColumnIndex! + $0.offset) : nil

@@ -7,193 +7,218 @@
 //
 
 import UIKit
-import SpriteKit
 
 protocol GameViewInput: AnyObject {
     var delegate: GameViewOutput? { get set }
 
-    // TODO: Think about it
-    func cancelGestureHandling()
-
+    func cancelLongTapGesture()
     func updateScore(count: Int)
     func setup(grid: GameGridInput)
     func drawLayer(layer: GameLayer, objects: [IntermediateFigure])
 }
 
 protocol GameViewOutput: AnyObject {
-    func back()
-    func handleLongTap(isInProgress: Bool)
+    func tapOnBackBtn()
     func tapOnBtn(moveType: MoveTypes)
+    func longTapOnBtn(moveType: MoveTypes, isInProgress: Bool)
 }
 
 private struct Layout {
-    let elementSize = CGSize(width: 30, height: 30)
+    static let backButtonLeading: CGFloat = 25
+    static let backButtonSize: CGFloat = 30
+
+    static let containerViewBottom: CGFloat = 20
+
+    static let panelControlWidth: CGFloat = 270
+    static let panelControlBottom: CGFloat = 20
+    static let panelControlBtnSideSize: CGFloat = {
+        if UIScreen.main.bounds.width == 375 {
+            return 35.0
+        } else {
+            return 45.0
+        }
+    }()
 }
 
-class GameView: UIView {
+final class GameView: UIView {
     weak var delegate: GameViewOutput?
 
-    @IBOutlet private weak var leftBtn: UIButton!
-    @IBOutlet private weak var rightBtn: UIButton!
-    @IBOutlet private weak var downBtn: UIButton!
-    @IBOutlet private weak var rotateBtn: UIButton!
-    @IBOutlet private weak var backBtn: UIButton!
+    private var backBtn: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setImage(UIImage(named: "left_icon"), for: .normal)
+        btn.backgroundColor = .containerColor
+        btn.tintColor = .btnTintColor
+        btn.clipsToBounds = true
+        btn.layer.cornerRadius = (Layout.backButtonSize * 0.5).rounded(.down)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(self, action: #selector(tapBack(_:)), for: .touchUpInside)
+        return btn
+    }()
 
-    @IBOutlet private weak var scoreLabel: UILabel!
-    @IBOutlet private weak var counterLabel: UILabel!
+    private var scoreLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Score:"
+        label.textColor = .btnTintColor
+        label.font = .appFont(size: 14, type: .regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
-    @IBOutlet private weak var containerView: UIView!
-    @IBOutlet private weak var containerWidth: NSLayoutConstraint!
-    @IBOutlet private weak var containerHeight: NSLayoutConstraint!
+    private var counterLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .btnTintColor
+        label.font = .appFont(size: 17, type: .regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
-    private let layout = Layout()
+    private var containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private var gridView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private var figuresView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private var panelControlView: (UIView & PanelControlInput)!
     private var grid: GameGridInput!
-    private var elementSize: CGSize!
-    private var gridView: SKView!
-    private(set) var gridScene: SKScene!
+    private var elementSize: CGSize = .zero
+    private var gridViewWidth: NSLayoutConstraint?
+    private var gridViewHeight: NSLayoutConstraint?
 
-    private var figureView: SKView!
-    private(set) var figureScene: SKScene!
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-
+    private func commonInit() {
         backgroundColor = .backgroundColor
-        containerView.backgroundColor = .containerColor
-        containerView.layer.cornerRadius = 6
-        configureButtons()
-        configureTitles()
+
+        panelControlView = PanelControlView(output: self)
+        panelControlView.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(backBtn)
+        addSubview(panelControlView)
+        addSubview(containerView)
+        addSubview(counterLabel)
+        addSubview(scoreLabel)
+
+        containerView.addSubview(gridView)
+        containerView.addSubview(figuresView)
+        gridViewWidth = gridView.widthAnchor.constraint(equalToConstant: .zero)
+        gridViewHeight = gridView.heightAnchor.constraint(equalToConstant: .zero)
+
+        NSLayoutConstraint.activate([
+            backBtn.widthAnchor.constraint(equalToConstant: Layout.backButtonSize),
+            backBtn.heightAnchor.constraint(equalToConstant: Layout.backButtonSize),
+            backBtn.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: Layout.backButtonLeading),
+            backBtn.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Layout.backButtonLeading),
+
+            panelControlView.widthAnchor.constraint(equalToConstant: Layout.panelControlWidth),
+            panelControlView.heightAnchor.constraint(equalToConstant: Layout.panelControlBtnSideSize * 3),
+            panelControlView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Layout.panelControlBottom),
+            panelControlView.centerXAnchor.constraint(equalTo: centerXAnchor),
+
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 40),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40),
+            containerView.bottomAnchor.constraint(equalTo: panelControlView.topAnchor, constant: -Layout.containerViewBottom),
+            containerView.topAnchor.constraint(equalTo: backBtn.bottomAnchor, constant: Layout.containerViewBottom),
+
+            gridView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            gridView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            gridViewWidth!,
+            gridViewHeight!,
+
+            figuresView.leadingAnchor.constraint(equalTo: gridView.leadingAnchor),
+            figuresView.topAnchor.constraint(equalTo: gridView.topAnchor),
+            figuresView.trailingAnchor.constraint(equalTo: gridView.trailingAnchor),
+            figuresView.bottomAnchor.constraint(equalTo: gridView.bottomAnchor),
+
+            scoreLabel.topAnchor.constraint(equalTo: backBtn.topAnchor),
+            scoreLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Layout.backButtonLeading),
+            counterLabel.trailingAnchor.constraint(equalTo: scoreLabel.trailingAnchor),
+            counterLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor, constant: 5)
+        ])
     }
 
-    private func configureTitles() {
-        [scoreLabel, counterLabel].forEach { (label) in
-            label?.font = .appFont(size: 17, type: .regular)
-            label?.textColor = .btnTintColor
-        }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
-    private func configureButtons() {
-        let views = [leftBtn, rightBtn, downBtn, rotateBtn].compactMap { $0 }
-        views.forEach { (btn) in
-            btn.backgroundColor = .containerColor
-            btn.layer.cornerRadius = 6
-            btn.tintColor = .btnTintColor
+    override func layoutSubviews() {
+        super.layoutSubviews()
 
-            btn.layer.shadowColor = UIColor.btnTintColor.withAlphaComponent(0.3).cgColor
-            btn.layer.shadowOpacity = 5
-            btn.layer.shadowOffset = .zero
-            btn.layer.shadowRadius = 3
-        }
-
-        leftBtn.setImage(#imageLiteral(resourceName: "left_icon"), for: .normal)
-        rightBtn.setImage(#imageLiteral(resourceName: "right_icon"), for: .normal)
-        downBtn.setImage(#imageLiteral(resourceName: "back_icon"), for: .normal)
-        rotateBtn.setImage(#imageLiteral(resourceName: "baseline_rotate_right_black_18dp").withRenderingMode(.alwaysTemplate), for: .normal)
-
-        backBtn.backgroundColor = .containerColor
-        backBtn.layer.cornerRadius = backBtn.frame.width * 0.5
-        backBtn.tintColor = .btnTintColor
-
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(longTap(sender:)))
-        downBtn.addGestureRecognizer(longPress)
+        let maxElements: CGFloat = CGFloat(max(grid.columns, grid.rows))
+        let size = (containerView.frame.height / maxElements).rounded(.down)
+        elementSize = CGSize(width: size, height: size)
+        gridViewWidth?.constant = (elementSize.width * CGFloat(grid.columns)).rounded(.down)
+        gridViewHeight?.constant = (elementSize.height * CGFloat(grid.rows)).rounded(.down)
     }
 
-    @objc private func longTap(sender: UILongPressGestureRecognizer) {
-        switch sender.state {
-        case .began:
-            delegate?.handleLongTap(isInProgress: true)
-        case .failed, .cancelled, .ended:
-            delegate?.handleLongTap(isInProgress: false)
-        default:
-            break
-        }
-    }
-
-    private func prepareGridView() {
-        gridView = SKView()
-        gridView.clipView(to: containerView)
-        gridScene = SKScene(size: CGSize(width: containerView.frame.width,
-                                         height: containerView.frame.height))
-        gridView.presentScene(gridScene)
-    }
-
-    private func prepareFigureView() {
-        figureView = SKView()
-        figureView.clipView(to: containerView)
-        figureView.backgroundColor = .clear
-
-        figureScene = SKScene(size: CGSize(width: containerView.frame.width,
-                                           height: containerView.frame.height))
-        figureScene.backgroundColor = .clear
-        figureView.presentScene(figureScene)
+    @objc
+    func tapBack(_ sender: Any?) {
+        delegate?.tapOnBackBtn()
     }
 }
 
 extension GameView: GameViewInput {
     func setup(grid: GameGridInput) {
         self.grid = grid
-
-        prepareGridView()
-        prepareFigureView()
-
-        containerWidth.constant = layout.elementSize.height * CGFloat(grid.columns)
-        containerHeight.constant = layout.elementSize.width * CGFloat(grid.rows)
     }
 
     func updateScore(count: Int) {
         counterLabel.text = "\(count)"
     }
 
-    func cancelGestureHandling() {
-        let gesture = downBtn.gestureRecognizers?.first(where: { $0 is UILongPressGestureRecognizer })
-        gesture?.isEnabled = false
-        gesture?.isEnabled = true
+    func cancelLongTapGesture() {
+        panelControlView.cancelLongTapGesture()
     }
 
     func drawLayer(layer: GameLayer, objects: [IntermediateFigure]) {
-        switch layer {
-        case .figure:
+        let view = layer == .grid ? gridView : figuresView
 
-            figureScene.removeAllChildren()
-            objects.forEach { (obj) in
-                let node = SKSpriteNode(color: obj.color?.getUIColor() ?? .white, size: layout.elementSize)
-                node.anchorPoint = .zero
-                node.position = CGPoint(
-                    x: layout.elementSize.width * CGFloat(obj.position.column),
-                    y: layout.elementSize.height * CGFloat(grid.rows - obj.position.row - 1)
-                )
-                figureScene.addChild(node)
-            }
-        case .grid:
-            gridScene.removeAllChildren()
-
-            objects.forEach { (obj) in
-                let path = IndexPath(row: obj.position.row, section: obj.position.column)
-                let node = obj.getSpriteNode(for: path, elementSize: layout.elementSize, rows: grid.rows)
-                gridScene.addChild(node)
-            }
+        view.subviews.forEach {
+            $0.removeFromSuperview()
+        }
+        objects.forEach { obj in
+            let rect = CGRect(x: elementSize.width * CGFloat(obj.position.column),
+                              y: elementSize.height * CGFloat(obj.position.row),
+                              width: elementSize.width,
+                              height: elementSize.height)
+            let figureView = UIView(frame: rect)
+            figureView.backgroundColor = obj.color?.getUIColor() ?? .white
+            figureView.layer.borderWidth = 0.2
+            figureView.layer.borderColor = UIColor.black.cgColor
+            view.addSubview(figureView)
         }
     }
 }
 
-extension GameView {
-    @IBAction func tapLeft(_ sender: Any) {
-        delegate?.tapOnBtn(moveType: .left)
+extension GameView: PanelControlOutput {
+    func getButtonSideSize() -> CGFloat {
+        return Layout.panelControlBtnSideSize
     }
 
-    @IBAction func tapRight(_ sender: Any) {
-        delegate?.tapOnBtn(moveType: .right)
+    func handleMove(type: MoveTypes) {
+        delegate?.tapOnBtn(moveType: type)
     }
 
-    @IBAction func tapRotate(_ sender: Any) {
-        delegate?.tapOnBtn(moveType: .rotate)
-    }
-
-    @IBAction func tapDown(_ sender: Any?) {
-        delegate?.tapOnBtn(moveType: .down)
-    }
-
-    @IBAction func tapBack(_ sender: Any?) {
-        delegate?.back()
+    func handleLongTap(type: MoveTypes, isInProgress: Bool) {
+        delegate?.longTapOnBtn(moveType: type, isInProgress: isInProgress)
     }
 }
